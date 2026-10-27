@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testharness/test-intent",
+  "title": "Test Intent set",
+  "description": "The unit of QA work. Two requirements describing the same behaviour are one intent and get one test.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "generated_at",
+    "intents"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+      "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+    },
+    "source": {
+      "type": "string",
+      "description": "Project-relative path of the requirement analysis this was derived from."
+    },
+    "intents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/intent"
+      }
+    }
+  },
+  "$defs": {
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "behaviour",
+        "actor",
+        "trigger",
+        "expected_outcome",
+        "risk",
+        "layer",
+        "oracle",
+        "coverage",
+        "outcome",
+        "confidence",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^TI-[0-9]{3,}$"
+        },
+        "behaviour": {
+          "type": "string",
+          "minLength": 10,
+          "description": "What is being validated, stated as behaviour not as a test step."
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_outcome": {
+          "type": "string",
+          "minLength": 5
+        },
+        "business_rule": {
+          "type": "string",
+          "description": "The rule that makes this correct. Empty means the rule is UNKNOWN and must be escalated."
+        },
+        "requirement_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level"
+          ],
+          "properties": {
+            "level": {
+              "enum": [
+                "critical",
+                "high",
+                "medium",
+                "low"
+              ]
+            },
+            "impact": {
+              "type": "string"
+            },
+            "likelihood": {
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ]
+            },
+            "register_ref": {
+              "type": "string"
+            }
+          }
+        },
+        "layer": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Lowest layer that reliably proves the intent."
+        },
+        "layer_rationale": {
+          "type": "string",
+          "description": "Why not a lower layer."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^@[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true,
+          "description": "Execution selectors carried into the test title, e.g. @money (retries off), @known-defect (excluded from the execution gate), @regression (tagged selection). First class: never encode these in prose for a later phase to parse."
+        },
+        "oracle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "detail"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "requirement",
+                "acceptance-criterion",
+                "business-rule",
+                "api-contract",
+                "database-state",
+                "ui-state",
+                "event",
+                "message",
+                "external-system-response",
+                "accessibility-standard",
+                "security-policy",
+                "performance-slo",
+                "approved-baseline"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "minLength": 5
+            }
+          }
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "existing"
+          ],
+          "properties": {
+            "existing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Existing tests already proving part of this intent."
+            },
+            "missing": {
+              "type": "string",
+              "description": "Precisely what is not yet proven."
+            },
+            "duplicate_of": {
+              "type": "string",
+              "description": "Intent id this collapses into, if any."
+            }
+          }
+        },
+        "outcome": {
+          "enum": [
+            "REUSE_EXISTING_TEST",
+            "EXTEND_EXISTING_TEST",
+            "MODIFY_EXISTING_TEST",
+            "CREATE_NEW_TEST",
+            "REUSE_EXISTING_COMPONENT",
+            "MODIFY_EXISTING_COMPONENT",
+            "CREATE_NEW_COMPONENT",
+            "REUSE_EXISTING_HELPER",
+            "CREATE_NEW_HELPER",
+            "MOVE_TO_LOWER_LAYER",
+            "API_TEST_PREFERRED",
+            "UI_TEST_REQUIRED",
+            "MANUAL_TEST_REQUIRED",
+            "ACCESSIBILITY_TEST_REQUIRED",
+            "SECURITY_TEST_REQUIRED",
+            "PERFORMANCE_TEST_REQUIRED",
+            "TESTABILITY_IMPROVEMENT_REQUIRED",
+            "NO_NEW_TEST_REQUIRED",
+            "NO_CHANGE_REQUIRED",
+            "INSUFFICIENT_EVIDENCE",
+            "BLOCKED_BY_ENVIRONMENT",
+            "BLOCKED_BY_PRODUCT_DEFECT"
+          ]
+        },
+        "provenance": {
+          "enum": [
+            "KNOWN",
+            "OBSERVED",
+            "INFERRED",
+            "ASSUMED",
+            "UNKNOWN",
+            "REQUIRES_CONFIRMATION"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 10,
+          "description": "What was inspected. Paths, selectors, endpoints, line refs."
+        },
+        "test_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Test case ids and automation symbols, filled in phases 7-8."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Triage",
+  "description": "runs/<run-id>/triage.json. Produced by qa-executor MODE triage. A classification is not a defect state.",
+  "type": "object",
+  "required": [
+    "run",
+    "failures"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "run": {
+      "type": "string"
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "test",
+          "classification",
+          "root_cause",
+          "evidence",
+          "confidence"
+        ],
+        "properties": {
+          "test": {
+            "type": "string"
+          },
+          "case_id": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "PRODUCT_DEFECT",
+              "AUTOMATION_DEFECT",
+              "TEST_DATA_FAILURE",
+              "ENVIRONMENT_FAILURE",
+              "DEPLOYMENT_MISMATCH",
+              "CONFIGURATION_FAILURE",
+              "FEATURE_FLAG_MISMATCH",
+              "NETWORK_FAILURE",
+              "SELECTOR_FAILURE",
+              "TIMING_FAILURE",
+              "DEPENDENCY_FAILURE",
+              "API_CONTRACT_FAILURE",
+              "ACCESSIBILITY_FAILURE",
+              "SECURITY_FAILURE",
+              "PERFORMANCE_FAILURE",
+              "FLAKY_TEST",
+              "UNKNOWN"
+            ]
+          },
+          "root_cause": {
+            "type": "string",
+            "description": "The mechanism, not the symptom."
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "healable": {
+            "type": "boolean"
+          },
+          "defect_id": {
+            "type": "string",
+            "description": "DEF-n when a defect candidate was logged."
+          },
+          "needs": {
+            "type": "string",
+            "description": "For UNKNOWN: what evidence would settle it."
+          }
+        }
+      }
+    }
+  }
+}

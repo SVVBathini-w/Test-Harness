@@ -1,0 +1,8 @@
+TC ID,Feature Area,Scenario,Portal,Scenario Type,Pre-conditions,Steps,Expected Result,Source (HLD / Scope),Status
+TC-XXX-001,Feature Name,Brief scenario description,Internal/External,Happy Path,"1. Precondition one
+2. Precondition two","1. Step one
+2. Step two
+3. Step three","Expected outcome one
+Expected outcome two",HLD #XX; Scope: Feature,Designed
+TC-XXX-002,Feature Name,Another scenario,Internal,Happy Path,"Logged in as Role; Entity state X",,"Result one
+Result two",HLD #XX,Pending

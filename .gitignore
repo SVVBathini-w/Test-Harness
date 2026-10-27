@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Secrets: never committed. Templates carry placeholders in .env.example only.
+.env
+.env.*
+!.env.example
+*.pem
+id_rsa*
+
+# Test workspace created by tests/helpers.mjs, removed on exit
+.test-tmp/
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/
+*.log

@@ -1,0 +1,43 @@
+{
+  "project": "example-app",
+  "generated_at": "2026-10-28",
+  "defects": [
+    {
+      "id": "DEF-001",
+      "title": "User creation accepts a duplicate email despite the uniqueness rule",
+      "state": "CONFIRMED_DEFECT",
+      "discovery_method": "AUTOMATED_TEST",
+      "failure_class": "PRODUCT_DEFECT",
+      "component": "user-api POST /users",
+      "feature": "User creation",
+      "steps": [
+        "Create a user with email alice@example.com",
+        "Create a second user with the same email"
+      ],
+      "expected": "409 Conflict and no second user created (business rule BR-004, email uniqueness)",
+      "actual": "201 Created and a second user record exists with the same email",
+      "severity": "high",
+      "severity_rationale": "Duplicate accounts corrupt identity data and break password reset for the affected customers",
+      "reproducibility": "ALWAYS",
+      "duplicate_decision": "CREATE_NEW_DEFECT",
+      "evidence": [
+        "registry/evidence/DEF-001/response.json"
+      ],
+      "traceability": {
+        "requirement_ids": [
+          "R-004"
+        ],
+        "intent_ids": [
+          "TI-042"
+        ],
+        "case_ids": [
+          "TC-3003"
+        ]
+      },
+      "regression_decision": "ADD_LOWER_LAYER_REGRESSION",
+      "status": "OPEN",
+      "confidence": "high",
+      "discovered_at": "2026-10-28"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Session scores",
+  "description": "registry/scores.json. Append-only history of the 8-dimension score, threshold 28 of 40.",
+  "type": "object",
+  "required": [
+    "project",
+    "sessions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "run",
+          "at",
+          "dimensions",
+          "total"
+        ],
+        "properties": {
+          "run": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "description": "ISO date or date-time"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "score",
+                "evidence"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                "evidence": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 8,
+            "maximum": 40
+          },
+          "skipped_work_considered": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "project": "example-app",
+  "generated_at": "2026-10-28",
+  "source": "inputs/requirements.md",
+  "intents": [
+    {
+      "id": "TI-042",
+      "behaviour": "A second user with an already-registered email is rejected and not persisted",
+      "actor": "administrator creating a user",
+      "trigger": "submits the user form with an email that already exists",
+      "preconditions": [
+        "a user with that email already exists"
+      ],
+      "expected_outcome": "409 Conflict, no second record stored, existing user unchanged",
+      "business_rule": "BR-004: email addresses are unique across accounts",
+      "requirement_refs": [
+        "R-004"
+      ],
+      "risk": {
+        "level": "high",
+        "impact": "duplicate identities corrupt login and password reset",
+        "likelihood": "medium"
+      },
+      "layer": 3,
+      "layer_rationale": "Server-side rule: provable at the API; the UI layer above it was rejected because it adds only rendering",
+      "tags": [
+        "@identity"
+      ],
+      "oracle": {
+        "kind": "business-rule",
+        "detail": "BR-004 email uniqueness"
+      },
+      "coverage": {
+        "existing": []
+      },
+      "outcome": "API_TEST_PREFERRED",
+      "confidence": "high",
+      "evidence": "derived from R-004 and BR-004"
+    }
+  ]
+}

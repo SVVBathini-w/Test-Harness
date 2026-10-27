@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testharness/hotspot-model",
+  "title": "Defect hotspot model",
+  "description": "Where defects are likely to hide in this target, and why. Drives non-uniform QA effort: high-risk components get more testing than low-risk ones. Signals are evidence of historical weakness, never proof that a defect exists now, so current behaviour must always be verified.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "generated_at",
+    "components"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+      "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+    },
+    "sources_inspected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What history was actually available and read: defect tracker, git log, prior run reports, incident records, support tickets, knowledge/defects/. Name what was NOT available too, because absent history is itself a coverage risk."
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "change_impact": {
+      "$ref": "#/$defs/changeImpact"
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "risk",
+        "signals",
+        "focus"
+      ],
+      "properties": {
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk": {
+          "enum": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        },
+        "signals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/signal"
+          },
+          "description": "Evidenced reasons this component is risky. A risk rating with no signals is an assertion, not analysis."
+        },
+        "focus": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Concrete conditions to attack here, specific enough to design a test or an exploratory charter from. Keyboard selection, delayed responses, duplicate results, empty results, role differences."
+        },
+        "historical_defect_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Recurring defect patterns this component has produced before."
+        },
+        "intent_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^TI-[0-9]{3,}$"
+          }
+        },
+        "effort_allocation": {
+          "enum": [
+            "HEAVY",
+            "ELEVATED",
+            "STANDARD",
+            "LIGHT"
+          ],
+          "description": "Relative QA effort. Do not distribute testing effort uniformly across components."
+        },
+        "coverage_state": {
+          "enum": [
+            "WELL_COVERED",
+            "PARTIALLY_COVERED",
+            "WEAKLY_COVERED",
+            "UNCOVERED",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal",
+        "evidence"
+      ],
+      "properties": {
+        "signal": {
+          "enum": [
+            "HISTORICAL_DEFECT_DENSITY",
+            "ESCAPED_DEFECT",
+            "REPEATED_REGRESSION",
+            "REOPENED_DEFECT",
+            "CODE_CHURN",
+            "CHANGE_FREQUENCY",
+            "COMPLEXITY",
+            "DEPENDENCY_COUNT",
+            "SHARED_COMPONENT",
+            "INTEGRATION_COMPLEXITY",
+            "ASYNCHRONOUS_BEHAVIOUR",
+            "COMPLEX_STATE",
+            "CONCURRENCY",
+            "CACHING",
+            "PERMISSIONS",
+            "FINANCIAL_CALCULATION",
+            "DATE_TIME_HANDLING",
+            "LOCALIZATION",
+            "BROWSER_DEVICE_VARIANCE",
+            "COMPLEX_TEST_DATA",
+            "WEAK_COVERAGE",
+            "RECENT_REFACTORING",
+            "OWNERSHIP_CHANGE",
+            "TECHNICAL_DEBT",
+            "FLAKY_BEHAVIOUR",
+            "PRODUCTION_INCIDENT",
+            "SUPPORT_INCIDENT"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 5,
+          "description": "The observation behind the signal: 4 defects in the tracker, 2 prior regressions, 38 commits in 90 days. Not a bare assertion."
+        },
+        "provenance": {
+          "enum": [
+            "KNOWN",
+            "OBSERVED",
+            "INFERRED",
+            "ASSUMED",
+            "UNKNOWN",
+            "REQUIRES_CONFIRMATION"
+          ],
+          "description": "CLAUDE.md section 7. Historical signals read from a tracker are OBSERVED; a guess about complexity is INFERRED at best."
+        }
+      }
+    },
+    "changeImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Present when the model was built for a specific change rather than for the whole target.",
+      "required": [
+        "blast_radius"
+      ],
+      "properties": {
+        "change_ref": {
+          "type": "string",
+          "description": "Commit, branch, requirement id or configuration change under analysis."
+        },
+        "change_sources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "REQUIREMENT",
+              "CODE",
+              "API",
+              "DATABASE_SCHEMA",
+              "CONFIGURATION",
+              "FEATURE_FLAG",
+              "DEPENDENCY",
+              "INFRASTRUCTURE"
+            ]
+          }
+        },
+        "blast_radius": {
+          "enum": [
+            "LOCAL",
+            "MODULE",
+            "CROSS_MODULE",
+            "SHARED_COMPONENT",
+            "INTEGRATION",
+            "SYSTEM_WIDE",
+            "UNKNOWN"
+          ],
+          "description": "Larger radius requires broader regression. UNKNOWN increases caution rather than reducing it, and is never a licence to skip regression."
+        },
+        "blast_radius_rationale": {
+          "type": "string",
+          "minLength": 15
+        },
+        "impact_set": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "artefact",
+              "reason"
+            ],
+            "properties": {
+              "artefact": {
+                "type": "string",
+                "description": "Code artefact, component, feature, workflow, business rule, intent or test reached by traversal."
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 5,
+                "description": "The relationship that put it in the set. Filename similarity is not a reason."
+              },
+              "hops": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Traversal distance from the change."
+              }
+            }
+          }
+        },
+        "selected_regression": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Case ids chosen for this change."
+        },
+        "excluded_regression": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id",
+              "reason"
+            ],
+            "properties": {
+              "case_id": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 5
+              },
+              "residual_risk": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Every regression plan must be able to explain what was left out and what that costs."
+        },
+        "residual_risk": {
+          "type": "string",
+          "description": "What remains untested after this selection. Never silently reduce coverage."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Run record",
+  "description": "runs/<run-id>/run.json. Created by bin/qa-runs.mjs. Identifies one execution so runs can be compared.",
+  "type": "object",
+  "required": [
+    "id",
+    "started",
+    "scope",
+    "budget"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^\\d{8}-\\d{6}-[0-9a-f]{4}$"
+    },
+    "started": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "finished": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "budget": {
+      "type": "string"
+    },
+    "change_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_phase": {
+      "type": "integer"
+    },
+    "commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "environment": {
+      "type": "string"
+    },
+    "command": {
+      "type": "string"
+    }
+  }
+}

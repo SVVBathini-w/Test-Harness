@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Independent review",
+  "description": "runs/<run-id>/review.json. Produced by a fresh qa-lead MODE review. Findings only; per-test oracle ratings go to registry/inventory.json.",
+  "type": "object",
+  "required": [
+    "run",
+    "findings",
+    "evidence_coverage"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "run": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "severity",
+          "kind",
+          "artefact",
+          "summary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RV-\\d+$"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "blocking",
+              "major",
+              "minor"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "vacuous-assertion",
+              "presence-check",
+              "swallowed-failure",
+              "implementation-as-oracle",
+              "selector-quality",
+              "duplicate-protection",
+              "wrong-layer",
+              "missing-coverage",
+              "other"
+            ]
+          },
+          "artefact": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "siblings_checked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remediation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence_coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "sound"
+      ],
+      "properties": {
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sound": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

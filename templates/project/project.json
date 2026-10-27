@@ -1,0 +1,59 @@
+{
+  "name": "template-project",
+  "mode": "new",
+  "display_name": "Replace with the objective this project covers",
+  "target": {
+    "kind": "web-app",
+    "base_url": "",
+    "environment": "test",
+    "authorised": false
+  },
+  "source_document": "",
+  "stage": "intake",
+  "layers": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "framework": {
+    "_placeholder": true,
+    "language": "typescript",
+    "e2e": "playwright",
+    "api": "playwright-request",
+    "runner": "playwright-test",
+    "a11y": "axe-core",
+    "perf": "none",
+    "package_manager": "npm",
+    "build_system": "npm"
+  },
+  "team": {},
+  "gates": {
+    "execution": {
+      "status": "pending"
+    },
+    "code_quality": {
+      "status": "pending",
+      "blocking": 0
+    },
+    "traceability": {
+      "status": "pending",
+      "coverage": 0
+    },
+    "reporting": {
+      "status": "pending"
+    },
+    "session_score": {
+      "status": "pending",
+      "score": null
+    }
+  },
+  "counters": {},
+  "created": "1970-01-01",
+  "updated": "1970-01-01",
+  "notes": "Copied from templates/project by qa-lead MODE: init. Layers 7 (security) and 8 (performance) stay disabled until target.authorised is true.",
+  "layout_version": 1,
+  "latest_run": null
+}

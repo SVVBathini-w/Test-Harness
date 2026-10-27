@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Heal log",
+  "description": "registry/heals.json. Append-only. Every heal records problem, evidence, change, confidence and validation (CLAUDE.md section 10).",
+  "type": "object",
+  "required": [
+    "project",
+    "heals"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "heals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "run",
+          "test",
+          "problem",
+          "evidence",
+          "change",
+          "confidence",
+          "validation",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^H-\\d+$"
+          },
+          "run": {
+            "type": "string"
+          },
+          "test": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "change": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "validation": {
+            "type": "string",
+            "description": "The re-run command and its actual result."
+          },
+          "at": {
+            "type": "string",
+            "description": "ISO date or date-time"
+          }
+        }
+      }
+    }
+  }
+}

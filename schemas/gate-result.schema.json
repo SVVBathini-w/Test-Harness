@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testharness/gate-result",
+  "title": "Quality gate result",
+  "description": "Every quality gate returns this object. Never free text. Never string-match a report to decide a gate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gate", "passed", "blocking", "evidence", "confidence", "produced_at"],
+  "properties": {
+    "gate": {
+      "enum": ["execution", "code_quality", "traceability", "reporting", "session_score"]
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "Derived from the gate rule, never asserted by prose."
+    },
+    "blocking": {
+      "type": "array",
+      "description": "Blocking findings. A blocking gate passes only when this is empty.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "summary", "artefact"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 },
+          "artefact": { "type": "string", "minLength": 1, "description": "Project-relative path of the responsible file." },
+          "line": { "type": "integer", "minimum": 1 },
+          "severity": { "enum": ["critical", "high", "medium", "low"] }
+        }
+      }
+    },
+    "coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Required by the traceability gate. Percent, four-direction closure."
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 40,
+      "description": "Required by the session_score gate. Threshold 28."
+    },
+    "release_assessment": {
+      "enum": ["QUALITY_CONFIDENCE_HIGH", "QUALITY_CONFIDENCE_MEDIUM", "QUALITY_CONFIDENCE_LOW", "PASS_RECOMMENDATION", "PASS_WITH_RISK", "FAIL_RECOMMENDATION", "BLOCKING_DEFECT_PRESENT", "RELEASE_RISK_ACCEPTANCE_REQUIRED", "INSUFFICIENT_EVIDENCE"],
+      "description": "Required by the reporting gate. Never derived from pass percentage alone. Where the release decision is business-owned, this is an evidence-based QA recommendation, not an assumption of release authority."
+    },
+    "residual_risk": {
+      "type": "string",
+      "description": "What remains untested or unproven after this run. An empty residual risk on a real project is almost always a reporting failure, not a clean bill of health."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Free-form numeric metrics the gate asserted on.",
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 20,
+      "description": "What was inspected to reach this verdict. Paths, counts, commands run."
+    },
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "produced_at": { "type": "string", "minLength": 10 },
+    "produced_by": { "type": "string" }
+  }
+}

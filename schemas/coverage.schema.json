@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Coverage and gap",
+  "description": "analysis/coverage.json. Produced by qa-analyst MODE gap. One entry per intent; nothing is marked covered because a filename matches.",
+  "type": "object",
+  "required": [
+    "project",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intent_id",
+          "outcome",
+          "evidence"
+        ],
+        "properties": {
+          "intent_id": {
+            "type": "string",
+            "pattern": "^TI-\\d+"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "One value from the CLAUDE.md section 3 outcome vocabulary, e.g. REUSE_EXISTING_TEST, CREATE_NEW_TEST, NO_NEW_TEST_REQUIRED."
+          },
+          "covering_tests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gap": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "justification": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "baseline": {
+      "type": "array",
+      "description": "Existing tests and what they actually prove (MODE coverage). Read the assertions; a test that navigates and asserts nothing meaningful is coverage theatre.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "test",
+          "path",
+          "layer",
+          "assertion_strength"
+        ],
+        "properties": {
+          "test": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "intent_proven": {
+            "type": "string"
+          },
+          "assertion_strength": {
+            "type": "string",
+            "enum": [
+              "strong",
+              "weak",
+              "none"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reuse": {
+      "type": "array",
+      "description": "Existing assets the build phase must use rather than recreate.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "asset",
+          "path",
+          "how_to_use"
+        ],
+        "properties": {
+          "asset": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "how_to_use": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "new_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "asset",
+          "why_nothing_existing_serves"
+        ],
+        "properties": {
+          "asset": {
+            "type": "string"
+          },
+          "why_nothing_existing_serves": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

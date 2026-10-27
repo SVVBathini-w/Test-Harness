@@ -1,0 +1,205 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Discovery",
+  "description": "analysis/discovery.json. Produced by qa-analyst MODE discovery. Observation, never assumption.",
+  "type": "object",
+  "required": [
+    "project",
+    "generated_at"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "reachable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "check": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "description": "Mirrors project.json framework; the decision itself lives there."
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "test",
+              "page-object",
+              "component-object",
+              "fixture",
+              "helper",
+              "api-client",
+              "test-data",
+              "config"
+            ]
+          },
+          "proves": {
+            "type": "string"
+          },
+          "reusable": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "conventions": {
+      "type": "object"
+    },
+    "selectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "element",
+          "page",
+          "locator",
+          "method"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "element": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "accessible_name": {
+            "type": "string"
+          },
+          "stable_attribute": {
+            "type": "string"
+          },
+          "locator": {
+            "type": "string",
+            "description": "Recommended locator, in preference order: role+name, label, test id, text."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "browser",
+              "source",
+              "webfetch",
+              "NOT VERIFIED"
+            ],
+            "description": "How it was established. NOT VERIFIED is the honest answer when it was not."
+          },
+          "observation": {
+            "type": "string",
+            "enum": [
+              "OBSERVED",
+              "PREDICTED"
+            ]
+          }
+        }
+      }
+    },
+    "interaction_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "pattern"
+        ],
+        "properties": {
+          "pattern": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "sequence": {
+            "type": "string"
+          },
+          "success_observable_as": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "object",
+      "properties": {
+        "prior_defects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flaky_tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "testability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "finding",
+          "product_change"
+        ],
+        "properties": {
+          "finding": {
+            "type": "string"
+          },
+          "product_change": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sources_inspected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "not_available": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

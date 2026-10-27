@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Release assessment",
+  "description": "runs/<run-id>/assessment.json. Written by qa-lead MODE report. The agent supplies judgement; bin/qa-reports.mjs supplies the numbers and refuses a verdict the facts contradict.",
+  "type": "object",
+  "required": [
+    "run",
+    "verdict",
+    "recommendation",
+    "residual_risk",
+    "not_tested",
+    "confidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "run": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "QUALITY_CONFIDENCE_HIGH",
+        "QUALITY_CONFIDENCE_MEDIUM",
+        "QUALITY_CONFIDENCE_LOW",
+        "PASS_RECOMMENDATION",
+        "PASS_WITH_RISK",
+        "FAIL_RECOMMENDATION",
+        "BLOCKING_DEFECT_PRESENT",
+        "RELEASE_RISK_ACCEPTANCE_REQUIRED",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    "recommendation": {
+      "type": "string",
+      "description": "One sentence, stated first in every report."
+    },
+    "rationale": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "factor",
+          "finding"
+        ],
+        "properties": {
+          "factor": {
+            "type": "string"
+          },
+          "finding": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "residual_risk": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "not_tested": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "skipped": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "release_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^DEF-\\d+"
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "known_limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "priority",
+          "action"
+        ],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "enum": [
+              "P1",
+              "P2",
+              "P3"
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "effort": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

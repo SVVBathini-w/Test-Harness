@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Decisions and approvals",
+  "description": "spec/decisions.json. Holds and records. A decision of a hold kind with status pending stops the run; only a person grants or denies it (bin/qa-decisions.mjs), and the write guard stops an agent doing so.",
+  "type": "object",
+  "required": [
+    "project",
+    "decisions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "subject",
+          "status",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^D-\\d+$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "authorisation",
+              "environment",
+              "test_location",
+              "business_rule",
+              "framework_change",
+              "bulk_retirement",
+              "tracker_push",
+              "oracle_answer",
+              "risk_acceptance",
+              "scope",
+              "other"
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "description": "What the decision is about, exactly: the directory for test_location, the environment name, the rule id."
+          },
+          "question": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "description": "ISO date or date-time"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "granted",
+              "denied",
+              "recorded"
+            ]
+          },
+          "raised_by": {
+            "type": "string",
+            "description": "The agent or person that asked."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Risk register",
+  "description": "spec/risks.json. Produced by qa-architect MODE risk. A risk is a consequence, not a missing test.",
+  "type": "object",
+  "required": [
+    "project",
+    "risks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "consequence",
+          "likelihood",
+          "impact",
+          "layers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RSK-\\d+$"
+          },
+          "consequence": {
+            "type": "string",
+            "description": "What happens if this breaks, in business terms."
+          },
+          "likelihood": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "impact": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25
+          },
+          "layers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            }
+          },
+          "basis": {
+            "type": "string",
+            "description": "Signal behind the likelihood: history, change rate, complexity."
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mitigation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "statement",
+          "basis",
+          "how_to_verify",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^A-\\d+$"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "how_to_verify": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "VERIFIED",
+              "INVALIDATED"
+            ]
+          }
+        }
+      }
+    },
+    "out_of_scope": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "area",
+          "risk_carried"
+        ],
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "risk_carried": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

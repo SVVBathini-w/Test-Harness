@@ -1,0 +1,516 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testharness/defect-record",
+  "title": "Defect register",
+  "description": "Candidate and confirmed product defects for one project. A failing test is not a defect: this record is what justifies calling it one. Never write a credential, token, secret or unnecessary PII into any field here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "generated_at",
+    "defects"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+      "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+    },
+    "defects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/defect"
+      }
+    }
+  },
+  "$defs": {
+    "defect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "state",
+        "discovery_method",
+        "component",
+        "expected",
+        "actual",
+        "severity",
+        "severity_rationale",
+        "reproducibility",
+        "duplicate_decision",
+        "evidence",
+        "confidence",
+        "discovered_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^DEF-[0-9]{3,}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 25,
+          "maxLength": 160,
+          "description": "Must identify the failure, not the area. Good: Customer creation accepts duplicate email despite uniqueness validation. Rejected: Customer issue, Test failed, Page not working."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Fuller prose description where the title cannot carry it."
+        },
+        "state": {
+          "enum": [
+            "SUSPECTED_RISK",
+            "POTENTIAL_DEFECT",
+            "REPRODUCED_DEFECT",
+            "CONFIRMED_DEFECT",
+            "HISTORICAL_DEFECT",
+            "KNOWN_PRODUCT_LIMITATION"
+          ],
+          "description": "Predicted risk is not a defect and a failure is not automatically a defect. Only CONFIRMED_DEFECT asserts a real product fault, and it requires confirmation.product_cause_established true."
+        },
+        "discovery_method": {
+          "enum": [
+            "AUTOMATED_TEST",
+            "EXPLORATORY",
+            "CODE_INSPECTION",
+            "API_PROBE",
+            "SILENT_FAILURE_DETECTION",
+            "CROSS_LAYER_CHECK",
+            "OBSERVABILITY_ORACLE",
+            "NEGATIVE_SPACE_CHECK",
+            "ACCESSIBILITY_SCAN",
+            "SECURITY_PROBE",
+            "PERFORMANCE_MEASUREMENT",
+            "HISTORICAL_ANALYSIS",
+            "USER_REPORT"
+          ],
+          "description": "How this was found. Not every defect comes from a failing test, and defects found only by exploratory testing are the ones a suite would never have caught. SILENT_FAILURE_DETECTION and CROSS_LAYER_CHECK matter most: a backend failure behind a successful-looking UI is invisible to any test that only asserts the UI."
+        },
+        "failure_class": {
+          "enum": [
+            "PRODUCT_DEFECT",
+            "AUTOMATION_DEFECT",
+            "TEST_DATA_FAILURE",
+            "ENVIRONMENT_FAILURE",
+            "FEATURE_FLAG_MISMATCH",
+            "CONFIGURATION_FAILURE",
+            "DEPLOYMENT_MISMATCH",
+            "NETWORK_FAILURE",
+            "SELECTOR_FAILURE",
+            "TIMING_FAILURE",
+            "DEPENDENCY_FAILURE",
+            "API_CONTRACT_FAILURE",
+            "ACCESSIBILITY_FAILURE",
+            "SECURITY_FAILURE",
+            "PERFORMANCE_FAILURE",
+            "FLAKY_TEST",
+            "UNKNOWN"
+          ],
+          "description": "CLAUDE.md section 9 class of the originating failure. Required in practice when discovery_method is AUTOMATED_TEST. State CONFIRMED_DEFECT alongside a non-product failure_class is a contradiction."
+        },
+        "confirmation": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The confirmation protocol. Absent or unevidenced confirmation caps state at POTENTIAL_DEFECT.",
+          "properties": {
+            "reproduced": {
+              "type": "boolean"
+            },
+            "reproduction_attempts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reproduction_notes": {
+              "type": "string"
+            },
+            "expected_behaviour_source": {
+              "type": "string",
+              "description": "The oracle. Requirement id, business rule id, API contract, accessibility standard or security policy that establishes what SHOULD happen. The code does X therefore X is correct is not a source."
+            },
+            "non_product_causes_ruled_out": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Which of automation, environment, test data, network, dependency and configuration were eliminated, and how."
+            },
+            "product_cause_established": {
+              "type": "boolean",
+              "description": "Required true for state CONFIRMED_DEFECT."
+            },
+            "product_evidence": {
+              "type": "string",
+              "description": "What in the product was inspected: endpoint response, DOM, log, source location."
+            }
+          }
+        },
+        "duplicate_decision": {
+          "enum": [
+            "CREATE_NEW_DEFECT",
+            "UPDATE_EXISTING_DEFECT",
+            "LINK_TO_EXISTING_DEFECT",
+            "KNOWN_DEFECT_NO_ACTION",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "description": "Outcome of the duplicate search. Never create a duplicate defect."
+        },
+        "duplicate_search": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "searched": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Where you looked: knowledge/defects/, this register, the external tracker, prior run reports."
+            },
+            "terms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "related_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "severity_rationale": {
+          "type": "string",
+          "minLength": 15,
+          "description": "Impact-based justification: business impact, user impact, workflow blockage, financial, security, accessibility, data corruption, affected population, workaround availability, compliance."
+        },
+        "priority_recommendation": {
+          "enum": [
+            "urgent",
+            "high",
+            "normal",
+            "low"
+          ],
+          "description": "A recommendation only. Priority is business-owned; QA does not assign organizational priority."
+        },
+        "reproducibility": {
+          "enum": [
+            "ALWAYS",
+            "INTERMITTENT",
+            "ONCE",
+            "NOT_REPRODUCED"
+          ]
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feature": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "description": "The actor or permission level the defect occurs under, where it matters."
+        },
+        "environment": {
+          "type": "string"
+        },
+        "build": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reproduction steps, specific enough for someone else to follow without this session's context."
+        },
+        "test_data_ref": {
+          "type": "string",
+          "description": "Path or identifier of the data used. Never the data itself when it carries PII."
+        },
+        "expected": {
+          "type": "string",
+          "minLength": 5
+        },
+        "actual": {
+          "type": "string",
+          "minLength": 5
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Project-relative paths: screenshot, video, trace, log, console output, HAR, request and response capture."
+        },
+        "traceability": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requirement_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "intent_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^TI-[0-9]{3,}$"
+              }
+            },
+            "case_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "business_rule": {
+              "type": "string"
+            },
+            "risk_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "test_refs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Project-relative test file paths, and the execution that produced the failure."
+            }
+          }
+        },
+        "regression_decision": {
+          "enum": [
+            "EXISTING_REGRESSION_SUFFICIENT",
+            "STRENGTHEN_EXISTING_REGRESSION",
+            "ADD_REGRESSION_TEST",
+            "ADD_LOWER_LAYER_REGRESSION",
+            "ADD_CROSS_FEATURE_REGRESSION",
+            "MANUAL_REGRESSION_REQUIRED",
+            "NO_REGRESSION_VALUE"
+          ],
+          "description": "Every confirmed defect triggers this decision. Do not reflexively add one UI regression test per bug: fix the underlying quality gap and prefer the lowest layer that detects it reliably."
+        },
+        "regression_rationale": {
+          "type": "string"
+        },
+        "fix_validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Three levels. Rerunning only the originally failing test is not fix validation.",
+          "properties": {
+            "level_1_fix_verified": {
+              "$ref": "#/$defs/validationStep"
+            },
+            "level_2_local_regression": {
+              "$ref": "#/$defs/validationStep"
+            },
+            "level_3_impact_regression": {
+              "$ref": "#/$defs/validationStep"
+            }
+          }
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "LOGGED_EXTERNAL",
+            "FIX_CLAIMED",
+            "FIX_VERIFIED",
+            "FIX_FAILED",
+            "REOPENED",
+            "WONT_FIX",
+            "NOT_A_DEFECT",
+            "CLOSED"
+          ],
+          "description": "QA does not close a defect unless explicitly authorised to. FIX_VERIFIED is the terminal QA state by default."
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "at",
+              "change"
+            ],
+            "properties": {
+              "at": {
+                "type": "string",
+                "minLength": 10,
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+                "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+              },
+              "change": {
+                "type": "string",
+                "minLength": 3
+              },
+              "evidence": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "external": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Populated only when an authorised defect tracker integration exists. Absent means the defect lives in this register alone.",
+          "properties": {
+            "system": {
+              "enum": [
+                "jira",
+                "azure-devops",
+                "github",
+                "none"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "pushed_at": {
+              "type": "string"
+            },
+            "push_status": {
+              "enum": [
+                "PUSHED",
+                "PENDING",
+                "NO_INTEGRATION",
+                "FAILED"
+              ]
+            }
+          }
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "discovered_at": {
+          "type": "string",
+          "minLength": 10,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+        },
+        "discovered_by": {
+          "type": "string"
+        },
+        "cross_layer": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Evidence from each layer of truth, for defects where UI appearance and backend reality diverge. Populate for high-risk workflows and for every suspected silent failure.",
+          "properties": {
+            "ui": {
+              "type": "string",
+              "description": "What the interface showed the user."
+            },
+            "api": {
+              "type": "string",
+              "description": "Status codes and response bodies actually returned."
+            },
+            "database": {
+              "type": "string",
+              "description": "Persisted state after the operation."
+            },
+            "events": {
+              "type": "string",
+              "description": "Events produced or not produced, and whether consumers acted."
+            },
+            "audit_log": {
+              "type": "string"
+            },
+            "external_system": {
+              "type": "string"
+            },
+            "logs": {
+              "type": "string",
+              "description": "Backend errors, including ones the UI never surfaced."
+            },
+            "correlation_id": {
+              "type": "string",
+              "description": "The single most useful field for tying layers together. Ask for it as an OBSERVABILITY_GAP where it does not exist."
+            },
+            "consistent": {
+              "type": "boolean",
+              "description": "False means the layers disagree, which is itself the defect."
+            },
+            "divergence": {
+              "type": "string",
+              "description": "Where and how the layers disagreed. \"UI showed Transfer complete; API returned 500; no ledger row written\" is the shape of this field."
+            }
+          }
+        },
+        "silent": {
+          "type": "boolean",
+          "description": "True when the product reported success, or reported nothing, while failing. These never surface as a red test and are found only by looking past the UI."
+        }
+      }
+    },
+    "validationStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASSED",
+            "FAILED",
+            "NOT_RUN",
+            "BLOCKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "description": "What was actually run: test ids, layer, or the selected impact set."
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Command run and its real result. Should pass is not a result."
+        },
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "minLength": 10,
+          "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+        }
+      }
+    }
+  }
+}

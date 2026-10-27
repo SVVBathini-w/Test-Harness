@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Change impact",
+  "description": "analysis/changes/<change-id>.json. Produced by qa-analyst MODE impact. A defended selection, never \"run everything\".",
+  "type": "object",
+  "required": [
+    "project",
+    "change_ref",
+    "changed_files",
+    "selected",
+    "excluded",
+    "blast_radius",
+    "residual_risk",
+    "confidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO date or date-time"
+    },
+    "change_ref": {
+      "type": "string"
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "changed_symbols": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "selected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "test",
+          "why"
+        ],
+        "properties": {
+          "test": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "area",
+          "reason"
+        ],
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "new_risk": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blast_radius": {
+      "type": "string",
+      "enum": [
+        "LOCAL",
+        "MODULE",
+        "CROSS_MODULE",
+        "SHARED_COMPONENT",
+        "INTEGRATION",
+        "SYSTEM_WIDE",
+        "UNKNOWN"
+      ]
+    },
+    "blast_radius_rationale": {
+      "type": "string"
+    },
+    "residual_risk": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    }
+  }
+}

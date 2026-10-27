@@ -1,0 +1,474 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testharness/project",
+  "title": "Project state machine",
+  "description": "One file per QA objective. The single source of resumable truth for a project.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "display_name",
+    "target",
+    "stage",
+    "layers",
+    "framework",
+    "gates",
+    "created",
+    "updated"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 40,
+      "description": "Slug. Kebab-case, 2-4 words."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "description": "What is under test.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "web-app",
+            "api",
+            "repository",
+            "document-only",
+            "mixed"
+          ]
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "api_base_url": {
+          "type": "string"
+        },
+        "repo_path": {
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "local",
+            "dev",
+            "test",
+            "staging",
+            "demo",
+            "shared",
+            "production",
+            "unknown"
+          ],
+          "description": "Environment class. production, shared and unknown hold phase 9 until a human grants an `environment` decision, because mutating tests against the wrong system cannot be undone."
+        },
+        "authorised": {
+          "type": "boolean",
+          "description": "Claim that testing this target is authorised. Layers 7 and 8 additionally require a granted `authorisation` decision in spec/decisions.json; this flag alone is not enough, because an agent can set it."
+        }
+      }
+    },
+    "source_document": {
+      "type": "string",
+      "description": "Project-relative path of the requirement copied into requirements/."
+    },
+    "stage": {
+      "enum": [
+        "intake",
+        "requirements",
+        "risk",
+        "strategy",
+        "intents",
+        "discovery",
+        "gap",
+        "design",
+        "build",
+        "execute",
+        "verify",
+        "report",
+        "learn",
+        "complete"
+      ]
+    },
+    "layers": {
+      "type": "array",
+      "description": "Enabled test layers. Disabled layers are excluded from coverage denominators.",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 8
+      }
+    },
+    "framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "runner"
+      ],
+      "description": "The project ACTUAL toolchain, discovered rather than assumed. The harness core is stack-agnostic. For a brownfield target the existing stack is the default: never introduce a new framework or language without a recorded justification in selection. Popularity and familiarity are not justifications.",
+      "properties": {
+        "_placeholder": {
+          "const": true,
+          "description": "Present only in the untouched template. Phase 0 must run stack discovery against the real target and either confirm this stack or replace it, then REMOVE this flag and record selection. A project still carrying _placeholder has not had its stack decided, it has inherited one."
+        },
+        "language": {
+          "enum": [
+            "typescript",
+            "javascript",
+            "python",
+            "csharp",
+            "java",
+            "kotlin",
+            "go",
+            "ruby",
+            "php",
+            "rust",
+            "other"
+          ]
+        },
+        "language_version": {
+          "type": "string",
+          "description": "The runtime or compiler version the suite must actually run under, not merely typecheck against."
+        },
+        "e2e": {
+          "type": "string",
+          "description": "e.g. playwright, selenium, webdriverio, cypress, puppeteer, robot-framework, none"
+        },
+        "mobile": {
+          "type": "string",
+          "description": "e.g. appium, espresso, xcuitest, maestro, detox, none"
+        },
+        "api": {
+          "type": "string",
+          "description": "e.g. playwright-request, supertest, requests, restassured, karate, newman, none"
+        },
+        "contract": {
+          "type": "string",
+          "description": "e.g. pact, openapi-validator, json-schema, none"
+        },
+        "a11y": {
+          "type": "string",
+          "description": "e.g. axe-core, axe-playwright-python, none"
+        },
+        "perf": {
+          "type": "string",
+          "description": "e.g. k6, jmeter, gatling, locust, artillery, lighthouse, none"
+        },
+        "runner": {
+          "type": "string",
+          "description": "e.g. playwright-test, pytest, vitest, jest, xunit, testng, junit, rspec, go-test"
+        },
+        "build_system": {
+          "type": "string",
+          "description": "e.g. npm, pnpm, yarn, maven, gradle, pip, poetry, dotnet, bundler, cargo"
+        },
+        "package_manager": {
+          "type": "string"
+        },
+        "selection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "decision",
+            "reason",
+            "discovered_from"
+          ],
+          "description": "Why this stack. Required once _placeholder is removed. This is the record that stops a future session quietly re-deciding the toolchain, and stops this one defaulting to whatever it knows best.",
+          "properties": {
+            "decision": {
+              "enum": [
+                "USE_EXISTING_FRAMEWORK",
+                "EXTEND_EXISTING_FRAMEWORK",
+                "ADD_CAPABILITY_TO_EXISTING_FRAMEWORK",
+                "SPECIALIZED_TOOL_REQUIRED",
+                "MIGRATION_RECOMMENDED",
+                "MIGRATION_IN_PROGRESS",
+                "NEW_FRAMEWORK_REQUIRED"
+              ],
+              "description": "For a brownfield repository USE_EXISTING_FRAMEWORK is the default. NEW_FRAMEWORK_REQUIRED against an existing stack demands strong evidence, not convenience."
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 20,
+              "description": "Evidence-based. \"Repository uses Maven, TestNG and Selenium 4 with 180 existing tests\" is a reason. \"Playwright is modern\" is not."
+            },
+            "discovered_from": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true,
+              "description": "What you actually inspected: package.json, pom.xml, build.gradle, requirements.txt, existing test directories, CI config. An empty list means the stack was assumed."
+            },
+            "greenfield": {
+              "type": "boolean",
+              "description": "True only when the target genuinely has no existing automation. Verify before asserting it."
+            },
+            "alternatives_considered": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "trade_offs": {
+              "type": "string"
+            },
+            "risks": {
+              "type": "string"
+            },
+            "existing_assets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Reusable fixtures, page objects, helpers and clients found in the target. Reuse beats create."
+            },
+            "decided_at": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+              "minLength": 10,
+              "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+            }
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "_placeholder"
+          ]
+        },
+        {
+          "required": [
+            "selection"
+          ]
+        }
+      ]
+    },
+    "team": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "team_members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agile_practice": {
+          "enum": [
+            "scrum",
+            "kanban",
+            "hybrid",
+            "waterfall"
+          ]
+        },
+        "sprint_length_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "risk_appetite": {
+          "enum": [
+            "low",
+            "moderate",
+            "high"
+          ]
+        },
+        "product_owner": {
+          "type": "string"
+        },
+        "qa_lead": {
+          "type": "string"
+        },
+        "tech_lead": {
+          "type": "string"
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution",
+        "code_quality",
+        "traceability",
+        "reporting",
+        "session_score"
+      ],
+      "properties": {
+        "execution": {
+          "$ref": "#/$defs/qualityGate"
+        },
+        "code_quality": {
+          "$ref": "#/$defs/qualityGate"
+        },
+        "traceability": {
+          "$ref": "#/$defs/qualityGate"
+        },
+        "reporting": {
+          "$ref": "#/$defs/qualityGate"
+        },
+        "session_score": {
+          "$ref": "#/$defs/warningGate"
+        }
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Idempotency counters. Rerunning a phase must not increment these twice for the same artefact."
+    },
+    "created": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+      "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+    },
+    "updated": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+      "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "new",
+        "existing"
+      ],
+      "description": "new: project created under ~/testharness-projects/<slug>. existing: QA artefacts in <repo>/qa/ beside the user's own test repo."
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "description": "Where the test project lives. Mode new: relative to the project directory, normally 'suite'. Mode existing: relative to the repo root (the parent of qa/), recorded by phase 5 discovery. Agents may write test code only here.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner_cwd": {
+          "type": "string",
+          "description": "Directory the runner is invoked from, relative to suite.path. Defaults to '.'."
+        }
+      }
+    },
+    "latest_run": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{8}-\\d{6}-[0-9a-f]{4}$",
+      "description": "Newest run id under runs/. Set only by bin/qa-runs.mjs."
+    },
+    "layout_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Project directory layout; see bin/lib/layout.mjs."
+    }
+  },
+  "$defs": {
+    "qualityGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "description": "No 'warn'. G1 to G4 are blocking under CLAUDE.md section 8: a blocking gate either passes or stops the pipeline. A warn here would let a run continue past a gate that did not pass, which is the one thing the gate exists to prevent.",
+          "enum": [
+            "pending",
+            "pass",
+            "fail"
+          ]
+        },
+        "blocking": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 8,
+          "maximum": 40
+        },
+        "evaluated_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "minLength": 10,
+          "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+        },
+        "run": {
+          "type": "string",
+          "description": "Run id whose gate file produced this verdict."
+        }
+      }
+    },
+    "warningGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "G5 session_score only. CLAUDE.md section 8 makes this the single warn-only gate: below threshold it warns and the pipeline continues, because an honest low score is information rather than a reason to stop.",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "pass",
+            "fail",
+            "warn"
+          ]
+        },
+        "blocking": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 8,
+          "maximum": 40
+        },
+        "evaluated_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "minLength": 10,
+          "description": "ISO-8601. Date, or date-time. Length alone is not a date."
+        },
+        "run": {
+          "type": "string",
+          "description": "Run id whose gate file produced this verdict."
+        }
+      }
+    }
+  }
+}
